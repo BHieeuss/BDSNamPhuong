@@ -8,14 +8,9 @@ let fullPageInstance = null;
 let propertiesSwiper = null;
 let isLoading = true;
 
-// Animation states tracking
-const animationStates = {
-  areas: false,
-  properties: false,
-  contact: false,
-  map: false,
-  search: false
-};
+// Optimized performance tracking
+const scrollObservers = new Map();
+const loadedImages = new Set();
 
 // ====== PROPERTY DATA ======
 const properties = [
@@ -252,50 +247,74 @@ function initializeScrollAnimations() {
       // Khởi tạo trạng thái cho section này
       sectionStates.set(section, { animated: false, isVisible: false });
       
-      // Create ScrollTrigger tối ưu hóa
+      // Create ScrollTrigger với show/hide animation mượt mà
       ScrollTrigger.create({
         trigger: section,
-        start: "top 75%", // Điều chỉnh để cân bằng
+        start: "top 75%", 
         end: "bottom 25%",
-        toggleActions: "play none none none", // Chỉ play một lần, không reverse
+        toggleActions: "play reverse play reverse", // Animation khi vào và ra
         onEnter: () => {
           const state = sectionStates.get(section);
-          if (!state.animated) {
-            state.animated = true;
-            state.isVisible = true;
+          state.isVisible = true;
+          state.animated = true;
+          
+          // Show animation với stagger mượt mà
+          animatedElements.forEach((element, i) => {
+            const delay = parseInt(element.getAttribute('data-delay')) || 0;
             
-            // Animate elements với stagger tự nhiên
-            animatedElements.forEach((element, i) => {
-              const delay = parseInt(element.getAttribute('data-delay')) || 0;
-              
-              gsap.to(element, {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: 1,
-                delay: (delay / 1000) + (i * 0.1), // Thêm stagger tự nhiên
-                ease: "power2.out"
-              });
+            gsap.to(element, {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.8,
+              delay: (delay / 1000) + (i * 0.1),
+              ease: "power2.out"
             });
-          }
+          });
         },
         onLeave: () => {
           const state = sectionStates.get(section);
           state.isVisible = false;
+          
+          // Hide animation mượt mà khi rời khỏi viewport
+          gsap.to(animatedElements, {
+            opacity: 0,
+            y: -40,
+            scale: 0.95,
+            duration: 0.4,
+            stagger: 0.03,
+            ease: "power2.in"
+          });
         },
         onEnterBack: () => {
           const state = sectionStates.get(section);
-          if (state.animated && !state.isVisible) {
-            state.isVisible = true;
-            // Đảm bảo elements vẫn visible khi scroll back
-            animatedElements.forEach((element) => {
-              gsap.set(element, {
-                opacity: 1,
-                y: 0,
-                scale: 1
-              });
+          state.isVisible = true;
+          
+          // Show animation mượt mà khi scroll back
+          animatedElements.forEach((element, i) => {
+            gsap.to(element, {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.6,
+              delay: i * 0.05, // Delay ngắn hơn khi scroll back
+              ease: "power2.out"
             });
-          }
+          });
+        },
+        onLeaveBack: () => {
+          const state = sectionStates.get(section);
+          state.isVisible = false;
+          
+          // Hide animation khi scroll up ra khỏi viewport
+          gsap.to(animatedElements, {
+            opacity: 0,
+            y: 40,
+            scale: 0.9,
+            duration: 0.4,
+            stagger: 0.03,
+            ease: "power2.in"
+          });
         }
       });
     }
@@ -308,110 +327,226 @@ function initializeScrollAnimations() {
 function initializeSpecialAnimations() {
   // Animation states are now tracked globally
   
-  // Animate area cards - tối ưu hóa
+  // Animate area cards với show/hide effect
   const areaCards = document.querySelectorAll('.area-card');
   if (areaCards.length > 0) {
+    // Set initial state
+    gsap.set(areaCards, {
+      opacity: 0,
+      y: 60,
+      scale: 0.8
+    });
+
     ScrollTrigger.create({
       trigger: '.areas-section',
-      start: "top 70%",
-      toggleActions: "play none none none",
+      start: "top 75%",
+      end: "bottom 25%",
+      toggleActions: "play reverse play reverse",
       onEnter: () => {
-        if (!animationStates.areas) {
-          animationStates.areas = true;
-          gsap.fromTo(areaCards, {
-            opacity: 0,
-            y: 60,
-            scale: 0.8
-          }, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.8,
-            stagger: 0.15,
-            ease: "power2.out"
-          });
-        }
+        gsap.to(areaCards, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: "power2.out"
+        });
+      },
+      onLeave: () => {
+        gsap.to(areaCards, {
+          opacity: 0,
+          y: -40,
+          scale: 0.95,
+          duration: 0.5,
+          stagger: 0.05,
+          ease: "power2.in"
+        });
+      },
+      onEnterBack: () => {
+        gsap.to(areaCards, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out"
+        });
+      },
+      onLeaveBack: () => {
+        gsap.to(areaCards, {
+          opacity: 0,
+          y: 40,
+          scale: 0.9,
+          duration: 0.5,
+          stagger: 0.05,
+          ease: "power2.in"
+        });
       }
     });
   }
-    // Property card animation is now handled in initializePropertyAnimation() 
-  // after the cards are rendered
   
-  // Animate contact items - tối ưu hóa
+  // Animate contact items với show/hide effect
   const contactItems = document.querySelectorAll('.contact-item');
   if (contactItems.length > 0) {
+    // Set initial state
+    gsap.set(contactItems, {
+      opacity: 0,
+      x: -40,
+      scale: 0.9
+    });
+
     ScrollTrigger.create({
       trigger: '.contact-section',
-      start: "top 70%",
-      toggleActions: "play none none none",
+      start: "top 75%",
+      end: "bottom 25%",
+      toggleActions: "play reverse play reverse",
       onEnter: () => {
-        if (!animationStates.contact) {
-          animationStates.contact = true;
-          gsap.fromTo(contactItems, {
-            opacity: 0,
-            x: -40,
-            scale: 0.9
-          }, {
-            opacity: 1,
-            x: 0,
-            scale: 1,
-            duration: 0.8,
-            stagger: 0.1,
-            ease: "power2.out"
-          });
-        }
+        gsap.to(contactItems, {
+          opacity: 1,
+          x: 0,
+          scale: 1,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power2.out"
+        });
+      },
+      onLeave: () => {
+        gsap.to(contactItems, {
+          opacity: 0,
+          x: -30,
+          scale: 0.95,
+          duration: 0.4,
+          stagger: 0.05,
+          ease: "power2.in"
+        });
+      },
+      onEnterBack: () => {
+        gsap.to(contactItems, {
+          opacity: 1,
+          x: 0,
+          scale: 1,
+          duration: 0.6,
+          stagger: 0.08,
+          ease: "power2.out"
+        });
+      },
+      onLeaveBack: () => {
+        gsap.to(contactItems, {
+          opacity: 0,
+          x: 30,
+          scale: 0.9,
+          duration: 0.4,
+          stagger: 0.05,
+          ease: "power2.in"
+        });
       }
     });
   }
   
-  // Animate map container - tối ưu hóa
+  // Animate map container với show/hide effect
   const mapContainer = document.querySelector('.map-container');
   if (mapContainer) {
+    // Set initial state
+    gsap.set(mapContainer, {
+      opacity: 0,
+      scale: 0.9,
+      y: 40
+    });
+
     ScrollTrigger.create({
       trigger: '.map-section',
-      start: "top 70%",
-      toggleActions: "play none none none",
+      start: "top 75%",
+      end: "bottom 25%",
+      toggleActions: "play reverse play reverse",
       onEnter: () => {
-        if (!animationStates.map) {
-          animationStates.map = true;
-          gsap.fromTo(mapContainer, {
-            opacity: 0,
-            scale: 0.9,
-            y: 40
-          }, {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            duration: 1,
-            ease: "power2.out"
-          });
-        }
+        gsap.to(mapContainer, {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 1,
+          ease: "power2.out"
+        });
+      },
+      onLeave: () => {
+        gsap.to(mapContainer, {
+          opacity: 0,
+          scale: 0.95,
+          y: -30,
+          duration: 0.5,
+          ease: "power2.in"
+        });
+      },
+      onEnterBack: () => {
+        gsap.to(mapContainer, {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out"
+        });
+      },
+      onLeaveBack: () => {
+        gsap.to(mapContainer, {
+          opacity: 0,
+          scale: 0.9,
+          y: 30,
+          duration: 0.5,
+          ease: "power2.in"
+        });
       }
     });
   }
   
-  // Animate search section - tối ưu hóa
+  // Animate search section với show/hide effect
   const searchContent = document.querySelector('.search-content');
   if (searchContent) {
+    // Set initial state
+    gsap.set(searchContent, {
+      opacity: 0,
+      y: 50,
+      scale: 0.95
+    });
+
     ScrollTrigger.create({
       trigger: '.search-section',
-      start: "top 70%",
-      toggleActions: "play none none none",
+      start: "top 75%",
+      end: "bottom 25%",
+      toggleActions: "play reverse play reverse",
       onEnter: () => {
-        if (!animationStates.search) {
-          animationStates.search = true;
-          gsap.fromTo(searchContent, {
-            opacity: 0,
-            y: 50,
-            scale: 0.95
-          }, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1,
-            ease: "power2.out"
-          });
-        }
+        gsap.to(searchContent, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1,
+          ease: "power2.out"
+        });
+      },
+      onLeave: () => {
+        gsap.to(searchContent, {
+          opacity: 0,
+          y: -40,
+          scale: 0.95,
+          duration: 0.5,
+          ease: "power2.in"
+        });
+      },
+      onEnterBack: () => {
+        gsap.to(searchContent, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.8,
+          ease: "power2.out"
+        });
+      },
+      onLeaveBack: () => {
+        gsap.to(searchContent, {
+          opacity: 0,
+          y: 40,
+          scale: 0.95,
+          duration: 0.5,
+          ease: "power2.in"
+        });
       }
     });
   }
@@ -1018,40 +1153,43 @@ function createRipple(event, element) {
 
 // ====== LAZY LOADING ======
 function initializeLazyLoading() {
-  const images = document.querySelectorAll('img[loading="lazy"]');
+  const images = document.querySelectorAll('img[loading="lazy"], img[data-src]');
   const loadedImages = new Set(); // Theo dõi images đã load
   
   if ('IntersectionObserver' in window) {
+    // Observer cho việc load hình ảnh
     const imageObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const img = entry.target;
-          const imgSrc = img.src || img.dataset.src;
+          const imgSrc = img.dataset.src || img.src;
           
           // Kiểm tra xem image đã được load chưa
           if (!loadedImages.has(imgSrc) && imgSrc) {
             loadedImages.add(imgSrc);
             
-            // Tạo hiệu ứng fade in mượt mà
-            gsap.set(img, { opacity: 0 });
+            // Set initial state
+            gsap.set(img, { opacity: 0, scale: 1.1 });
             
-            // Load image
+            // Load image với placeholder
             const tempImg = new Image();
             tempImg.onload = () => {
               img.src = imgSrc;
               img.classList.remove('lazy');
               
-              // Fade in animation
+              // Fade in animation với scale effect
               gsap.to(img, {
                 opacity: 1,
-                duration: 0.5,
+                scale: 1,
+                duration: 0.6,
                 ease: "power2.out"
               });
             };
             tempImg.onerror = () => {
               // Nếu load lỗi, vẫn hiển thị với opacity thấp
               gsap.to(img, {
-                opacity: 0.5,
+                opacity: 0.3,
+                scale: 1,
                 duration: 0.3
               });
             };
@@ -1062,14 +1200,47 @@ function initializeLazyLoading() {
         }
       });
     }, {
-      rootMargin: '50px 0px', // Load sớm hơn một chút
+      rootMargin: '100px 0px', // Load sớm hơn
       threshold: 0.1
+    });
+
+    // Observer cho việc show/hide hình ảnh khi scroll
+    const visibilityObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const img = entry.target;
+        
+        if (entry.isIntersecting) {
+          // Show image khi vào viewport
+          gsap.to(img, {
+            opacity: loadedImages.has(img.dataset.src || img.src) ? 1 : 0,
+            scale: 1,
+            duration: 0.5,
+            ease: "power2.out"
+          });
+        } else {
+          // Hide image khi ra khỏi viewport (tuỳ chọn)
+          // Comment dòng dưới nếu không muốn ẩn hình ảnh
+          gsap.to(img, {
+            opacity: 0.7,
+            scale: 0.98,
+            duration: 0.3,
+            ease: "power2.in"
+          });
+        }
+      });
+    }, {
+      rootMargin: '-50px 0px',
+      threshold: 0.2
     });
     
     images.forEach(img => {
-      if (!loadedImages.has(img.src)) {
+      // Observe cho lazy loading
+      if (!loadedImages.has(img.src) && !loadedImages.has(img.dataset.src)) {
         imageObserver.observe(img);
       }
+      
+      // Observe cho visibility effects
+      visibilityObserver.observe(img);
     });
   } else {
     // Fallback cho browsers không hỗ trợ IntersectionObserver
@@ -1078,6 +1249,7 @@ function initializeLazyLoading() {
       if (imgSrc) {
         img.src = imgSrc;
         img.classList.remove('lazy');
+        gsap.set(img, { opacity: 1, scale: 1 });
       }
     });
   }
@@ -1098,27 +1270,51 @@ function initializePropertyAnimation() {
     scale: 0.9
   });
 
-  // Create scroll-triggered animation for property cards
+  // Create scroll-triggered animation for property cards với show/hide effect
   ScrollTrigger.create({
     trigger: '.properties-section',
-    start: "top 70%",
-    toggleActions: "play none none none",
+    start: "top 75%",
+    end: "bottom 25%",
+    toggleActions: "play reverse play reverse",
     onEnter: () => {
-      if (!animationStates.properties) {
-        animationStates.properties = true;
-        gsap.fromTo(propertyCards, {
-          opacity: 0,
-          y: 50,
-          scale: 0.9
-        }, {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.8,
-          stagger: 0.2,
-          ease: "power2.out"
-        });
-      }
+      gsap.to(propertyCards, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "power2.out"
+      });
+    },
+    onLeave: () => {
+      gsap.to(propertyCards, {
+        opacity: 0,
+        y: -40,
+        scale: 0.95,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "power2.in"
+      });
+    },
+    onEnterBack: () => {
+      gsap.to(propertyCards, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.15,
+        ease: "power2.out"
+      });
+    },
+    onLeaveBack: () => {
+      gsap.to(propertyCards, {
+        opacity: 0,
+        y: 40,
+        scale: 0.9,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "power2.in"
+      });
     }
   });
 }
@@ -1220,6 +1416,38 @@ function addScrollOptimization() {
     scrollListenerAdded = true;
   }
 }
+
+// ====== PERFORMANCE OPTIMIZATIONS ======
+// Batch ScrollTrigger refresh
+let refreshTimeout;
+function batchScrollTriggerRefresh() {
+  clearTimeout(refreshTimeout);
+  refreshTimeout = setTimeout(() => {
+    ScrollTrigger.refresh();
+  }, 100);
+}
+
+// Optimized visibility check
+function isElementInViewport(element, threshold = 0.1) {
+  const rect = element.getBoundingClientRect();
+  const viewHeight = Math.max(document.documentElement.clientHeight, window.innerHeight);
+  return (
+    rect.bottom >= viewHeight * threshold &&
+    rect.top <= viewHeight * (1 - threshold)
+  );
+}
+
+// Memory cleanup for animations
+function cleanupAnimations() {
+  ScrollTrigger.getAll().forEach(trigger => {
+    if (!trigger.trigger || !document.contains(trigger.trigger)) {
+      trigger.kill();
+    }
+  });
+}
+
+// Run cleanup periodically
+setInterval(cleanupAnimations, 30000); // Every 30 seconds
 
 // ====== ERROR HANDLING ======
 window.addEventListener('error', (e) => {
