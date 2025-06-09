@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://unpkg.com/swiper@11/swiper-bundle.min.css">
     <link rel="stylesheet" href="assets/style.css">
 </head>
-<<body>    <!-- ====== Background Slideshow ====== -->
+<body>    <!-- ====== Background Slideshow ====== -->
     <div id="backgroundSlideshow" class="background-slideshow">
       <div class="bg-slide active" style="background-image: url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1920&q=80');"></div>
       <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=1920&q=80');"></div>
@@ -37,7 +37,8 @@
           <div class="progress-bar"></div>
         </div>
       </div>  
-    </div>    <!-- ====== Floating Header ====== -->
+    </div>   
+      <!-- ====== Floating Header ====== -->
     <header class="floating-header">
       <div class="container-fluid">
         <div class="header-content">
@@ -48,14 +49,14 @@
             <span class="brand-text">Văn Phương</span>
           </a>
           <nav class="header-nav">
-            <a href="#" class="nav-link active">Trang chủ</a>
-            <a href="#" class="nav-link">Dịch vụ</a>
-            <a href="#" class="nav-link">Tin tức</a>
-            <a href="#" class="nav-link">Liên hệ</a>
+            <a href="#hero" class="nav-link active">Trang chủ</a>
+            <a href="#search" class="nav-link">Dịch vụ</a>
+            <a href="#areas" class="nav-link">Tin tức</a>
+            <a href="#contact" class="nav-link">Liên hệ</a>
           </nav>
           <div class="header-actions">
-            <button class="btn btn-primary">Đăng tin</button>
-            <button class="menu-toggle" aria-label="Menu">
+            <!-- <button class="btn btn-primary d-none d-md-block">Đăng tin</button> -->
+            <button class="menu-toggle d-md-none" aria-label="Menu">
               <span></span>
               <span></span>
               <span></span>
@@ -63,10 +64,27 @@
           </div>
         </div>
       </div>
-    </header>    <!-- ====== Main Content ====== -->
+
+      <!-- Mobile Menu -->
+      <div class="mobile-menu">
+        <div class="mobile-menu-content">
+          <nav class="mobile-nav">
+            <a href="#hero" class="mobile-nav-link active">Trang chủ</a>
+            <a href="#search" class="mobile-nav-link">Dịch vụ</a>
+            <a href="#areas" class="mobile-nav-link">Tin tức</a>
+            <a href="#contact" class="mobile-nav-link">Liên hệ</a>
+          </nav>
+          <!-- <div class="mobile-actions">
+            <button class="btn btn-primary w-100">Đăng tin</button>
+          </div> -->
+        </div>
+      </div>
+    </header>
+
+    <!-- ====== Main Content ====== -->
     <main>
         <!-- ====== Section 1: Hero/Intro ====== -->
-      <section class="hero-section">
+      <section class="hero-section" id="hero">
         <div class="slide-content hero-section">
           <div class="container h-100">
             <div class="row h-100 align-items-center">
@@ -157,7 +175,7 @@
       </section>
 
       <!-- ====== Section 2: Search ====== -->
-      <section class="search-section">
+      <section class="search-section" id="search">
         <div class="slide-content search-section">
           <div class="container h-100">
             <div class="row h-100 align-items-center justify-content-center">
@@ -228,7 +246,7 @@
       </section>
 
       <!-- ====== Section 3: Featured Areas ====== -->
-      <section class="areas-section">
+      <section class="areas-section" id="areas">
         <div class="slide-content areas-section">
           <div class="container h-100">
             <div class="section-header text-center mb-5">
@@ -426,7 +444,7 @@
           </div>
         </div>
       </section>      <!-- ====== Section 6: Contact ====== -->
-      <section class="contact-section">
+      <section class="contact-section" id="contact">
           <div class="container h-100">
             <div class="row h-100 align-items-center">
               <div class="col-lg-6">

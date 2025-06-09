@@ -606,39 +606,78 @@ function initializeNavigation() {
   // Simplified navigation without fullPage.js
   // Mobile hamburger menu toggle
   const menuToggle = document.querySelector('.menu-toggle');
-  const headerNav = document.querySelector('.header-nav');
+  const mobileMenu = document.querySelector('.mobile-menu');
   
-  if (menuToggle && headerNav) {
+  if (menuToggle && mobileMenu) {
     menuToggle.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       
       // Toggle menu visibility
-      headerNav.classList.toggle('mobile-active');
+      mobileMenu.classList.toggle('active');
       menuToggle.classList.toggle('active');
+      
+      // Prevent body scroll when menu is open
+      if (mobileMenu.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
       
       // Track menu toggle event
       trackEvent('mobile_menu_toggle', { 
-        isOpen: headerNav.classList.contains('mobile-active')
+        isOpen: mobileMenu.classList.contains('active')
       });
     });
     
     // Close mobile menu when clicking outside
     document.addEventListener('click', (e) => {
-      if (!headerNav.contains(e.target) && !menuToggle.contains(e.target)) {
-        headerNav.classList.remove('mobile-active');
+      if (!mobileMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+        mobileMenu.classList.remove('active');
         menuToggle.classList.remove('active');
-      }
-    });
-    
-    // Close mobile menu on escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && headerNav.classList.contains('mobile-active')) {
-        headerNav.classList.remove('mobile-active');
-        menuToggle.classList.remove('active');
+        document.body.style.overflow = '';
       }
     });
   }
+
+  // ====== Smooth Scroll for Header & Mobile Menu ======
+  function scrollToSection(e, selector) {
+    const target = document.querySelector(selector);
+    if (target) {
+      e.preventDefault();
+      const header = document.querySelector('.floating-header');
+      const headerHeight = header ? header.offsetHeight : 0;
+      const top = target.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  }
+
+  // Header nav links
+  document.querySelectorAll('.header-nav .nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        scrollToSection(e, href);
+        document.querySelectorAll('.header-nav .nav-link').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+      }
+    });
+  });
+  // Mobile nav links
+  document.querySelectorAll('.mobile-nav .mobile-nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        scrollToSection(e, href);
+        document.querySelectorAll('.mobile-nav .mobile-nav-link').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+        // Close mobile menu after click
+        mobileMenu.classList.remove('active');
+        menuToggle.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  });
 }
 
 // ====== SLIDE ANIMATIONS ======
@@ -1358,14 +1397,15 @@ function showToast(message, type = 'success') {
 
 // ====== RESPONSIVE HANDLING ======
 function handleResize() {
-  const headerNav = document.querySelector('.header-nav');
+  const mobileMenu = document.querySelector('.mobile-menu');
   const menuToggle = document.querySelector('.menu-toggle');
   
   // Close mobile menu when switching to desktop
   if (window.innerWidth > 768) {
-    if (headerNav && menuToggle) {
-      headerNav.classList.remove('mobile-active');
+    if (mobileMenu && menuToggle) {
+      mobileMenu.classList.remove('active');
       menuToggle.classList.remove('active');
+      document.body.style.overflow = '';
     }
   }
 }
