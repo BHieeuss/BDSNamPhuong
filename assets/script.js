@@ -8,6 +8,15 @@ let fullPageInstance = null;
 let propertiesSwiper = null;
 let isLoading = true;
 
+// Animation states tracking
+const animationStates = {
+  areas: false,
+  properties: false,
+  contact: false,
+  map: false,
+  search: false
+};
+
 // ====== PROPERTY DATA ======
 const properties = [
   {
@@ -74,9 +83,12 @@ const properties = [
 
 // ====== INITIALIZATION ======
 document.addEventListener('DOMContentLoaded', function() {
+  // Khởi tạo theo thứ tự ưu tiên
   initializeLoading();
   initializeGSAP();
   initializeBackgroundSlideshow();
+  
+  // Khởi tạo các components khác sau một delay nhỏ
   setTimeout(() => {
     initializeFullPage();
     initializeSwiper();
@@ -84,38 +96,113 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeForms();
     initializeFloatingContact();
     initializeLazyLoading();
+    
+    // Finish loading cuối cùng
     finishLoading();
-  }, 1500);
+  }, 1000); // Giảm từ 1500ms xuống 1000ms
+  
+  // Thêm performance monitoring
+  window.addEventListener('load', () => {
+    // Đảm bảo ScrollTrigger được refresh sau khi tất cả resources đã load
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 500);
+  });
 });
 
 // ====== LOADING ANIMATION ======
 function initializeLoading() {
   const progressBar = document.querySelector('.progress-bar');
+  const loadingText = document.querySelector('.loading-text');
   let progress = 0;
+  let isLoadingComplete = false;
   
+  // Tạo hiệu ứng loading text động
+  const loadingMessages = [
+    'Đang tải...',
+  ];
+  let messageIndex = 0;
+  
+  // Progress animation với tốc độ thông minh hơn
   const progressInterval = setInterval(() => {
-    progress += Math.random() * 15;
-    if (progress >= 100) {
-      progress = 100;
-      clearInterval(progressInterval);
+    if (!isLoadingComplete) {
+      // Tốc độ loading thay đổi theo progress
+      const speedMultiplier = progress < 50 ? 1.5 : progress < 80 ? 1 : 0.5;
+      progress += (Math.random() * 8 + 2) * speedMultiplier;
+      
+      if (progress >= 100) {
+        progress = 100;
+        isLoadingComplete = true;
+        clearInterval(progressInterval);
+      }
+      
+      progressBar.style.width = progress + '%';
+      
+      // Thay đổi text theo progress
+      const newMessageIndex = Math.floor((progress / 100) * loadingMessages.length);
+      if (newMessageIndex !== messageIndex && newMessageIndex < loadingMessages.length) {
+        messageIndex = newMessageIndex;
+        if (loadingText) {
+          gsap.to(loadingText, {
+            opacity: 0,
+            duration: 0.2,
+            onComplete: () => {
+              loadingText.textContent = loadingMessages[messageIndex];
+              gsap.to(loadingText, {
+                opacity: 1,
+                duration: 0.2
+              });
+            }
+          });
+        }
+      }
     }
-    progressBar.style.width = progress + '%';
-  }, 100);
+  }, 80); // Giảm interval để mượt hơn
+  
+  // Đảm bảo loading hoàn tất sau thời gian tối đa
+  setTimeout(() => {
+    if (!isLoadingComplete) {
+      progress = 100;
+      isLoadingComplete = true;
+      clearInterval(progressInterval);
+      progressBar.style.width = '100%';
+    }
+  }, 2000);
 }
 
 function finishLoading() {
   const loadingOverlay = document.getElementById('loadingOverlay');
+  const loadingContent = document.querySelector('.loading-content');
   
-  gsap.to(loadingOverlay, {
-    opacity: 0,
-    duration: 0.8,
-    ease: "power2.out",
-    onComplete: () => {
-      loadingOverlay.style.display = 'none';
-      isLoading = false;
-      startAnimations();
-    }
-  });
+  // Đợi một chút để đảm bảo tất cả resources đã load
+  setTimeout(() => {
+    // Animate loading content trước
+    gsap.to(loadingContent, {
+      scale: 1.05,
+      duration: 0.3,
+      ease: "power2.out",
+      onComplete: () => {
+        // Sau đó fade out toàn bộ overlay
+        gsap.to(loadingOverlay, {
+          opacity: 0,
+          scale: 1.1,
+          duration: 0.8,
+          ease: "power2.inOut",
+          onComplete: () => {
+            loadingOverlay.style.display = 'none';
+            isLoading = false;
+            
+            // Khởi động animations sau khi loading hoàn tất
+            setTimeout(() => {
+              startAnimations();
+              // Refresh ScrollTrigger sau khi tất cả đã ổn định
+              ScrollTrigger.refresh();
+            }, 100);
+          }
+        });
+      }
+    });
+  }, 300);
 }
 
 // ====== BACKGROUND SLIDESHOW ======
@@ -140,107 +227,248 @@ function initializeBackgroundSlideshow() {
 function initializeGSAP() {
   gsap.registerPlugin(ScrollTrigger);
   
-  // Remove old background animations - slideshow handles background now
+  // Initialize scroll-triggered animations for all elements with data-delay
+  initializeScrollAnimations();
+}
+
+function initializeScrollAnimations() {
+  // Set initial state cho tất cả animated elements
+  gsap.set('[data-delay]', {
+    opacity: 0,
+    y: 60,
+    scale: 0.9
+  });
+  
+  // Tạo một object để theo dõi trạng thái animation của mỗi section
+  const sectionStates = new Map();
+  
+  // Create scroll-triggered animations for each section
+  const sections = document.querySelectorAll('section');
+  
+  sections.forEach((section, index) => {
+    const animatedElements = section.querySelectorAll('[data-delay]');
+    
+    if (animatedElements.length > 0) {
+      // Khởi tạo trạng thái cho section này
+      sectionStates.set(section, { animated: false, isVisible: false });
+      
+      // Create ScrollTrigger tối ưu hóa
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top 75%", // Điều chỉnh để cân bằng
+        end: "bottom 25%",
+        toggleActions: "play none none none", // Chỉ play một lần, không reverse
+        onEnter: () => {
+          const state = sectionStates.get(section);
+          if (!state.animated) {
+            state.animated = true;
+            state.isVisible = true;
+            
+            // Animate elements với stagger tự nhiên
+            animatedElements.forEach((element, i) => {
+              const delay = parseInt(element.getAttribute('data-delay')) || 0;
+              
+              gsap.to(element, {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 1,
+                delay: (delay / 1000) + (i * 0.1), // Thêm stagger tự nhiên
+                ease: "power2.out"
+              });
+            });
+          }
+        },
+        onLeave: () => {
+          const state = sectionStates.get(section);
+          state.isVisible = false;
+        },
+        onEnterBack: () => {
+          const state = sectionStates.get(section);
+          if (state.animated && !state.isVisible) {
+            state.isVisible = true;
+            // Đảm bảo elements vẫn visible khi scroll back
+            animatedElements.forEach((element) => {
+              gsap.set(element, {
+                opacity: 1,
+                y: 0,
+                scale: 1
+              });
+            });
+          }
+        }
+      });
+    }
+  });
+  
+  // Add special animations for specific elements
+  initializeSpecialAnimations();
+}
+
+function initializeSpecialAnimations() {
+  // Animation states are now tracked globally
+  
+  // Animate area cards - tối ưu hóa
+  const areaCards = document.querySelectorAll('.area-card');
+  if (areaCards.length > 0) {
+    ScrollTrigger.create({
+      trigger: '.areas-section',
+      start: "top 70%",
+      toggleActions: "play none none none",
+      onEnter: () => {
+        if (!animationStates.areas) {
+          animationStates.areas = true;
+          gsap.fromTo(areaCards, {
+            opacity: 0,
+            y: 60,
+            scale: 0.8
+          }, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "power2.out"
+          });
+        }
+      }
+    });
+  }
+    // Property card animation is now handled in initializePropertyAnimation() 
+  // after the cards are rendered
+  
+  // Animate contact items - tối ưu hóa
+  const contactItems = document.querySelectorAll('.contact-item');
+  if (contactItems.length > 0) {
+    ScrollTrigger.create({
+      trigger: '.contact-section',
+      start: "top 70%",
+      toggleActions: "play none none none",
+      onEnter: () => {
+        if (!animationStates.contact) {
+          animationStates.contact = true;
+          gsap.fromTo(contactItems, {
+            opacity: 0,
+            x: -40,
+            scale: 0.9
+          }, {
+            opacity: 1,
+            x: 0,
+            scale: 1,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out"
+          });
+        }
+      }
+    });
+  }
+  
+  // Animate map container - tối ưu hóa
+  const mapContainer = document.querySelector('.map-container');
+  if (mapContainer) {
+    ScrollTrigger.create({
+      trigger: '.map-section',
+      start: "top 70%",
+      toggleActions: "play none none none",
+      onEnter: () => {
+        if (!animationStates.map) {
+          animationStates.map = true;
+          gsap.fromTo(mapContainer, {
+            opacity: 0,
+            scale: 0.9,
+            y: 40
+          }, {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 1,
+            ease: "power2.out"
+          });
+        }
+      }
+    });
+  }
+  
+  // Animate search section - tối ưu hóa
+  const searchContent = document.querySelector('.search-content');
+  if (searchContent) {
+    ScrollTrigger.create({
+      trigger: '.search-section',
+      start: "top 70%",
+      toggleActions: "play none none none",
+      onEnter: () => {
+        if (!animationStates.search) {
+          animationStates.search = true;
+          gsap.fromTo(searchContent, {
+            opacity: 0,
+            y: 50,
+            scale: 0.95
+          }, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 1,
+            ease: "power2.out"
+          });
+        }
+      }
+    });
+  }
 }
 
 function startAnimations() {
-  // Hero section animations
-  const heroElements = document.querySelectorAll('[data-delay]');
-  heroElements.forEach(element => {
-    const delay = parseInt(element.dataset.delay) || 0;
-    gsap.fromTo(element, 
-      { 
-        opacity: 0, 
-        y: 50 
-      },
-      { 
-        opacity: 1, 
-        y: 0, 
+  // Đảm bảo hero section không bị conflict với scroll animations
+  const heroElements = document.querySelectorAll('.hero-section [data-delay]');
+  
+  // Chỉ animate hero nếu nó đang ở viewport
+  if (window.scrollY < window.innerHeight / 2) {
+    heroElements.forEach((element) => {
+      const delay = parseInt(element.getAttribute('data-delay')) || 0;
+      
+      // Set initial state mượt mà hơn
+      gsap.set(element, {
+        opacity: 0,
+        y: 40,
+        scale: 0.95
+      });
+      
+      gsap.to(element, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
         duration: 1,
-        delay: delay / 1000,
+        delay: (delay + 300) / 1000, // Giảm delay để nhanh hơn
         ease: "power2.out"
-      }
-    );
-  });
-  
-  // Floating cards animation
-  gsap.to('.card-item', {
-    y: -10,
-    duration: 2,
-    repeat: -1,
-    yoyo: true,
-    ease: "power2.inOut",
-    stagger: 0.2
-  });
-  
-  // Scroll indicator animation
-  gsap.to('.scroll-arrow', {
-    y: 10,
-    duration: 1.5,
-    repeat: -1,
-    yoyo: true,
-    ease: "power2.inOut"
-  });
+      });
+    });
+    
+    // Animate scroll indicator
+    const scrollIndicator = document.querySelector('.scroll-indicator');
+    if (scrollIndicator) {
+      gsap.fromTo(scrollIndicator, {
+        opacity: 0,
+        y: 20
+      }, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        delay: 1.5,
+        ease: "power2.out"
+      });
+    }
+  }
 }
 
 // ====== FULLPAGE.JS INITIALIZATION ======
+// Removed - No longer using fullPage.js for section transitions
 function initializeFullPage() {
-  fullPageInstance = new fullpage('#fullpage', {
-    // Navigation
-    menu: '.slide-navigation',
-    anchors: ['hero', 'search', 'areas', 'properties', 'map', 'contact'],
-    navigation: false,
-    
-    // Scrolling
-    scrollingSpeed: 1000,
-    easing: 'easeInOutCubic',
-    css3: true,
-    
-    // Design
-    verticalCentered: false,
-    
-    // Hide watermark
-    credits: { enabled: false },
-    
-    // Callbacks
-    onLeave: function(origin, destination, direction) {
-      updateNavigation(destination.index);
-      animateSlideTransition(destination.index);
-    },
-    
-    afterLoad: function(origin, destination, direction) {
-      triggerSlideAnimations(destination.index);
-    }
-  });
+  // Disabled fullPage functionality to use normal scrolling
 }
 
 // ====== NAVIGATION ======
 function initializeNavigation() {
-  const navDots = document.querySelectorAll('.nav-dot');
-  
-  navDots.forEach((dot, index) => {
-    dot.addEventListener('click', () => {
-      fullPageInstance.moveTo(index + 1);
-    });
-  });
-  
-  // Header navigation
-  const headerNavLinks = document.querySelectorAll('.header-nav .nav-link');
-  headerNavLinks.forEach((link, index) => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      fullPageInstance.moveTo(index + 1);
-      
-      // Close mobile menu if it's open
-      const headerNav = document.querySelector('.header-nav');
-      const menuToggle = document.querySelector('.menu-toggle');
-      if (headerNav.classList.contains('mobile-active')) {
-        headerNav.classList.remove('mobile-active');
-        menuToggle.classList.remove('active');
-      }
-    });
-  });
-  
+  // Simplified navigation without fullPage.js
   // Mobile hamburger menu toggle
   const menuToggle = document.querySelector('.menu-toggle');
   const headerNav = document.querySelector('.header-nav');
@@ -276,192 +504,10 @@ function initializeNavigation() {
       }
     });
   }
-  
-  // Hero buttons
-  const heroButtons = document.querySelectorAll('.hero-actions .btn');
-  heroButtons.forEach(button => {
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (button.textContent.includes('Khám phá')) {
-        fullPageInstance.moveTo(2); // Go to search section
-      }
-    });
-  });
 }
 
-function updateNavigation(activeIndex) {
-  const navDots = document.querySelectorAll('.nav-dot');
-  const headerNavLinks = document.querySelectorAll('.header-nav .nav-link');
-  
-  // Update nav dots
-  navDots.forEach((dot, index) => {
-    dot.classList.toggle('active', index === activeIndex);
-  });
-  
-  // Update header navigation
-  headerNavLinks.forEach((link, index) => {
-    link.classList.toggle('active', index === activeIndex);
-  });
-}
-
-function animateSlideTransition(slideIndex) {
-  // Add transition effects based on slide
-  const slides = document.querySelectorAll('.section');
-  slides.forEach((slide, index) => {
-    if (index === slideIndex) {
-      gsap.fromTo(slide.querySelector('.slide-content'), 
-        { opacity: 0, scale: 0.95 },
-        { opacity: 1, scale: 1, duration: 0.8, ease: "power2.out" }
-      );
-    }
-  });
-}
-
-function triggerSlideAnimations(slideIndex) {
-  const currentSlide = document.querySelectorAll('.section')[slideIndex];
-  const animatedElements = currentSlide.querySelectorAll('[data-delay]');
-  
-  // Special handling for map section (index 4)
-  if (slideIndex === 4) {
-    animateMapSection(currentSlide);
-    return;
-  }
-  
-  // Special handling for contact section (index 5)
-  if (slideIndex === 5) {
-    animateContactSection(currentSlide);
-    return;
-  }
-  
-  animatedElements.forEach(element => {
-    const delay = parseInt(element.dataset.delay) || 0;
-    gsap.fromTo(element, 
-      { opacity: 0, y: 30 },
-      { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.8,
-        delay: delay / 1000,
-        ease: "power2.out"
-      }
-    );
-  });
-}
-
-// ====== MAP SECTION ANIMATIONS ======
-function animateMapSection(mapSection) {
-  const mapContainer = mapSection.querySelector('.map-container');
-  const mapWrapper = mapSection.querySelector('.map-wrapper');
-  const infoCards = mapSection.querySelectorAll('.info-card');
-  
-  // Animate container
-  gsap.fromTo(mapContainer, 
-    { opacity: 0, y: 50 },
-    { 
-      opacity: 1, 
-      y: 0, 
-      duration: 1,
-      ease: "power2.out"
-    }
-  );
-  
-  // Animate map frame with slight delay
-  gsap.fromTo(mapWrapper, 
-    { opacity: 0, scale: 0.95 },
-    { 
-      opacity: 1, 
-      scale: 1, 
-      duration: 1.2,
-      delay: 0.3,
-      ease: "back.out(1.7)"
-    }
-  );
-  
-  // Animate info cards staggered
-  gsap.fromTo(infoCards, 
-    { opacity: 0, y: 30 },
-    { 
-      opacity: 1, 
-      y: 0, 
-      duration: 0.8,
-      delay: 0.6,
-      stagger: 0.2,
-      ease: "power2.out"
-    }
-  );
-  
-  // Add CSS classes for hover effects
-  setTimeout(() => {
-    mapContainer.classList.add('in-view');
-    infoCards.forEach(card => card.classList.add('in-view'));
-  }, 1000);
-}
-
-// ====== CONTACT SECTION ANIMATIONS ======
-function animateContactSection(contactSection) {
-  const contactContent = contactSection.querySelector('.contact-content');
-  const contactFormWrapper = contactSection.querySelector('.contact-form-wrapper');
-  const contactItems = contactSection.querySelectorAll('.contact-item');
-  const socialLinks = contactSection.querySelector('.social-links');
-  
-  // Animate contact content
-  gsap.fromTo(contactContent, 
-    { opacity: 0, x: -50 },
-    { 
-      opacity: 1, 
-      x: 0, 
-      duration: 1,
-      ease: "power2.out"
-    }
-  );
-  
-  // Animate form wrapper
-  gsap.fromTo(contactFormWrapper, 
-    { opacity: 0, x: 50 },
-    { 
-      opacity: 1, 
-      x: 0, 
-      duration: 1,
-      delay: 0.2,
-      ease: "power2.out"
-    }
-  );
-  
-  // Animate contact items staggered
-  gsap.fromTo(contactItems, 
-    { opacity: 0, y: 30 },
-    { 
-      opacity: 1, 
-      y: 0, 
-      duration: 0.8,
-      delay: 0.4,
-      stagger: 0.2,
-      ease: "power2.out"
-    }
-  );
-  
-  // Animate social links
-  if (socialLinks) {
-    gsap.fromTo(socialLinks, 
-      { opacity: 0, y: 30 },
-      { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.8,
-        delay: 0.8,
-        ease: "power2.out"
-      }
-    );
-  }
-  
-  // Add CSS classes for hover effects and animations
-  setTimeout(() => {
-    contactItems.forEach(item => item.classList.add('in-view'));
-  }, 1000);
-  
-  // Add form validation and interactions
-  initializeContactFormInteractions(contactSection);
-}
+// ====== SLIDE ANIMATIONS ======
+// Removed slide transition animations - keeping only lazy loading
 
 // ====== SWIPER CAROUSEL ======
 function initializeSwiper() {
@@ -590,10 +636,12 @@ function renderProperties() {
               <i class="bx bx-heart"></i>
             </button>
           </div>
-        </div>
-      </div>
+        </div>      </div>
     </div>
   `).join('');
+  
+  // Initialize property card animations after rendering
+  initializePropertyAnimation();
 }
 
 // ====== FORM HANDLING ======
@@ -636,8 +684,11 @@ function handleSearch(e) {
 }
 
 function showSearchResults(results) {
-  // Navigate to properties section and update carousel
-  fullPageInstance.moveTo(4);
+  // Scroll to properties section using smooth scroll
+  const propertiesSection = document.querySelector('[data-anchor="properties"]');
+  if (propertiesSection) {
+    propertiesSection.scrollIntoView({ behavior: 'smooth' });
+  }
   
   // Update swiper with filtered results
   setTimeout(() => {
@@ -968,21 +1019,108 @@ function createRipple(event, element) {
 // ====== LAZY LOADING ======
 function initializeLazyLoading() {
   const images = document.querySelectorAll('img[loading="lazy"]');
+  const loadedImages = new Set(); // Theo dõi images đã load
   
   if ('IntersectionObserver' in window) {
     const imageObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const img = entry.target;
-          img.src = img.src || img.dataset.src;
-          img.classList.remove('lazy');
-          observer.unobserve(img);
+          const imgSrc = img.src || img.dataset.src;
+          
+          // Kiểm tra xem image đã được load chưa
+          if (!loadedImages.has(imgSrc) && imgSrc) {
+            loadedImages.add(imgSrc);
+            
+            // Tạo hiệu ứng fade in mượt mà
+            gsap.set(img, { opacity: 0 });
+            
+            // Load image
+            const tempImg = new Image();
+            tempImg.onload = () => {
+              img.src = imgSrc;
+              img.classList.remove('lazy');
+              
+              // Fade in animation
+              gsap.to(img, {
+                opacity: 1,
+                duration: 0.5,
+                ease: "power2.out"
+              });
+            };
+            tempImg.onerror = () => {
+              // Nếu load lỗi, vẫn hiển thị với opacity thấp
+              gsap.to(img, {
+                opacity: 0.5,
+                duration: 0.3
+              });
+            };
+            tempImg.src = imgSrc;
+            
+            observer.unobserve(img);
+          }
         }
       });
+    }, {
+      rootMargin: '50px 0px', // Load sớm hơn một chút
+      threshold: 0.1
     });
     
-    images.forEach(img => imageObserver.observe(img));
+    images.forEach(img => {
+      if (!loadedImages.has(img.src)) {
+        imageObserver.observe(img);
+      }
+    });
+  } else {
+    // Fallback cho browsers không hỗ trợ IntersectionObserver
+    images.forEach(img => {
+      const imgSrc = img.src || img.dataset.src;
+      if (imgSrc) {
+        img.src = imgSrc;
+        img.classList.remove('lazy');
+      }
+    });
   }
+}
+
+// ====== PROPERTY ANIMATIONS ======
+function initializePropertyAnimation() {
+  // Only create animation if property cards exist
+  const propertyCards = document.querySelectorAll('.property-card');
+  if (propertyCards.length === 0) {
+    return; // No property cards found, skip animation setup
+  }
+
+  // Set initial state for property cards
+  gsap.set(propertyCards, {
+    opacity: 0,
+    y: 50,
+    scale: 0.9
+  });
+
+  // Create scroll-triggered animation for property cards
+  ScrollTrigger.create({
+    trigger: '.properties-section',
+    start: "top 70%",
+    toggleActions: "play none none none",
+    onEnter: () => {
+      if (!animationStates.properties) {
+        animationStates.properties = true;
+        gsap.fromTo(propertyCards, {
+          opacity: 0,
+          y: 50,
+          scale: 0.9
+        }, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.8,
+          stagger: 0.2,
+          ease: "power2.out"
+        });
+      }
+    }
+  });
 }
 
 // ====== UTILITY FUNCTIONS ======
@@ -1027,20 +1165,8 @@ function handleResize() {
   const headerNav = document.querySelector('.header-nav');
   const menuToggle = document.querySelector('.menu-toggle');
   
-  if (window.innerWidth <= 768) {
-    // Mobile-specific adjustments
-    if (fullPageInstance) {
-      fullPageInstance.setAutoScrolling(false);
-      fullPageInstance.setFitToSection(false);
-    }
-  } else {
-    // Desktop-specific adjustments
-    if (fullPageInstance) {
-      fullPageInstance.setAutoScrolling(true);
-      fullPageInstance.setFitToSection(true);
-    }
-    
-    // Close mobile menu when switching to desktop
+  // Close mobile menu when switching to desktop
+  if (window.innerWidth > 768) {
     if (headerNav && menuToggle) {
       headerNav.classList.remove('mobile-active');
       menuToggle.classList.remove('active');
@@ -1051,7 +1177,7 @@ function handleResize() {
 window.addEventListener('resize', handleResize);
 
 // ====== PERFORMANCE OPTIMIZATION ======
-// Debounce function for scroll events
+// Debounce function cho scroll events
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
@@ -1062,6 +1188,37 @@ function debounce(func, wait) {
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
+}
+
+// Throttle function cho high-frequency events
+function throttle(func, limit) {
+  let inThrottle;
+  return function() {
+    const args = arguments;
+    const context = this;
+    if (!inThrottle) {
+      func.apply(context, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  }
+}
+
+// Optimized scroll handler
+const optimizedScrollHandler = throttle(() => {
+  // Chỉ refresh ScrollTrigger khi cần thiết
+  if (!isLoading) {
+    ScrollTrigger.refresh();
+  }
+}, 250);
+
+// Add scroll listener chỉ khi cần thiết
+let scrollListenerAdded = false;
+function addScrollOptimization() {
+  if (!scrollListenerAdded) {
+    window.addEventListener('scroll', optimizedScrollHandler, { passive: true });
+    scrollListenerAdded = true;
+  }
 }
 
 // ====== ERROR HANDLING ======
