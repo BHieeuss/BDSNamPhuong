@@ -6,293 +6,584 @@
     <title>Bất Động Sản Văn Phương</title>
     <!-- ====== CSS & Fonts ====== -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Google Fonts Montserrat -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts - Modern Font Stack -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Boxicons for more icons -->
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <!-- fullPage.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/4.0.20/fullpage.min.css">
+    <!-- Swiper CSS for carousels -->
+    <link rel="stylesheet" href="https://unpkg.com/swiper@11/swiper-bundle.min.css">
     <link rel="stylesheet" href="assets/style.css">
 </head>
-<body>
-    <!-- ====== Loading Overlay ====== -->
-    <div id="loadingOverlay">
-      <div class="loading-inner">
-        <span class="loading-logo">
-          <span class="d-flex align-items-center justify-content-center" style="background:#bfa76a;width:56px;height:56px;border-radius:14px;">
-            <i class="bi bi-house-door-fill" style="color:#23262f;font-size:2rem;"></i>
-          </span>
-        </span>
-        <div class="loading-text mt-3">Đang tải...</div>
-        <div class="loading-spinner mt-3">
-          <span class="spinner-dot" style="--i:0"></span>
-          <span class="spinner-dot" style="--i:1"></span>
-          <span class="spinner-dot" style="--i:2"></span>
-        </div>
-      </div>
+<<body>    <!-- ====== Background Slideshow ====== -->
+    <div id="backgroundSlideshow" class="background-slideshow">
+      <div class="bg-slide active" style="background-image: url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1920&q=80');"></div>
+      <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=1920&q=80');"></div>
+      <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1920&q=80');"></div>
+      <div class="bg-overlay"></div>
     </div>
-    <!-- ====== Header/Navbar ====== -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3">
-      <div class="container">
-        <a class="navbar-brand d-flex align-items-center fw-bold text-brown fs-3" href="#">
-          <span class="me-2 d-flex align-items-center justify-content-center" style="background:#bfa76a;width:40px;height:40px;display:inline-flex;border-radius:10px;">
-            <i class="bi bi-house-door-fill" style="color:#23262f;font-size:1.7rem;"></i>
-          </span>
-          <span style="font-weight:700;font-size:2rem;letter-spacing:0.02em;color:#23262f;">Văn Phương</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Chuyển đổi menu">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-          <ul class="navbar-nav align-items-center" style="gap: 18px;">
-            <li class="nav-item"><a class="nav-link text-brown fw-bold" href="#">Trang chủ</a></li>
-            <li class="nav-item"><a class="nav-link text-brown fw-bold" href="#listing">Danh sách</a></li>
-            <li class="nav-item"><a class="nav-link text-brown fw-bold" href="#">Tính năng</a></li>
-            <li class="nav-item"><a class="nav-link text-brown fw-bold" href="#">Trang</a></li>
-            <li class="nav-item"><a class="nav-link text-brown fw-bold" href="#">Tin tức</a></li>
-            <li class="nav-item"><a class="nav-link text-brown fw-bold" href="#">Liên hệ</a></li>
-            <li class="nav-item ms-3">
-              <a class="btn btn-gold px-4 py-2 fw-bold rounded-4" href="#" style="font-size:1.1rem;min-width:140px;">+ Đăng tin</a>
-            </li>
-          </ul>
+
+    <!-- ====== Loading Overlay ====== -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="loading-content">
+        <div class="loading-logo">
+          <div class="logo-icon">
+            <i class="bi bi-house-door-fill"></i>
+          </div>
         </div>
+        <div class="loading-text">Đang tải</i>
+        </div>
+        <div class="loading-progress">
+          <div class="progress-bar"></div>
+        </div>
+      </div>  
+    </div>
+
+    <!-- ====== Navigation Dots ====== -->
+    <nav class="slide-navigation">
+      <div class="nav-dots">
+        <button class="nav-dot active" data-slide="0" aria-label="Trang chủ">
+          <span class="dot-label">Trang chủ</span>
+        </button>
+        <button class="nav-dot" data-slide="1" aria-label="Tìm kiếm">
+          <span class="dot-label">Tìm kiếm</span>
+        </button>
+        <button class="nav-dot" data-slide="2" aria-label="Danh sách">
+          <span class="dot-label">Danh sách</span>
+        </button>        <button class="nav-dot" data-slide="3" aria-label="Sản phẩm">
+          <span class="dot-label">Sản phẩm</span>
+        </button>
+        <button class="nav-dot" data-slide="4" aria-label="Bản đồ">
+          <span class="dot-label">Bản đồ</span>
+        </button>
+        <button class="nav-dot" data-slide="5" aria-label="Liên hệ">
+          <span class="dot-label">Liên hệ</span>
+        </button>
       </div>
     </nav>
 
-    <!-- ====== Banner + Search + Service Box ====== -->
-    <section class="hero-section position-relative" style="background: #23262f url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat; min-height: 640px;">
-      <div class="banner-overlay position-absolute top-0 start-0 w-100 h-100"></div>
-      <div class="container position-relative z-2 py-5">
-        <div class="row align-items-center">
-          <div class="col-lg-7 mb-4 mb-lg-0">
-            <h1 class="display-5 fw-bold mb-3 text-white">TÌM KIẾM NGÔI NHÀ MƠ ƯỚC CỦA BẠN</h1>
-            <p class="lead mb-4 text-white-50">Chỉ từ 200 triệu, nhiều ưu đãi hấp dẫn.<br>Bạn đang tìm kiếm loại bất động sản nào tại Trà Vinh?</p>
-            <div class="row g-3 mb-4">
-              <div class="col-md-4">
-                <div class="service-box text-center p-4 bg-white rounded-4 shadow-sm h-100">
-                  <div class="mb-2"><i class="bx bx-home-alt-2 fs-1 text-gold"></i></div>
-                  <h6 class="fw-bold text-brown mb-1">ĐẤT Ở</h6>
-                  <div class="small text-brown-50">Danh sách đất thổ cư, đất nền tại Trà Vinh</div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="service-box text-center p-4 bg-white rounded-4 shadow-sm h-100">
-                  <div class="mb-2"><i class="bx bx-leaf fs-1 text-gold"></i></div>
-                  <h6 class="fw-bold text-brown mb-1">ĐẤT NÔNG NGHIỆP</h6>
-                  <div class="small text-brown-50">Đầu tư đất vườn, đất ruộng sinh lời cao</div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="service-box text-center p-4 bg-white rounded-4 shadow-sm h-100">
-                  <div class="mb-2"><i class="bx bx-buildings fs-1 text-gold"></i></div>
-                  <h6 class="fw-bold text-brown mb-1">DỰ ÁN</h6>
-                  <div class="small text-brown-50">Đất dự án, khu đô thị mới tại Trà Vinh</div>
-                </div>
-              </div>
+    <!-- ====== Floating Header ====== -->
+    <header class="floating-header">
+      <div class="container-fluid">
+        <div class="header-content">
+          <a href="#" class="brand">
+            <div class="brand-icon">
+              <i class="bi bi-house-door-fill"></i>
             </div>
-            <div class="mt-2 text-white-50 small">
-              Trước khi tìm kiếm, hãy xác định ngân sách phù hợp với thu nhập, chi phí và khoản tiết kiệm của bạn.
+            <span class="brand-text">Văn Phương</span>
+          </a>
+          <nav class="header-nav">
+            <a href="#" class="nav-link active">Trang chủ</a>
+            <a href="#" class="nav-link">Dịch vụ</a>
+            <a href="#" class="nav-link">Tin tức</a>
+            <a href="#" class="nav-link">Liên hệ</a>
+          </nav>
+          <div class="header-actions">
+            <button class="btn btn-primary">Đăng tin</button>
+            <button class="menu-toggle" aria-label="Menu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ====== fullPage Container ====== -->
+    <div id="fullpage">
+        <!-- ====== Section 1: Hero/Intro ====== -->
+      <div class="section" data-anchor="hero">
+        <div class="slide-content hero-section">
+          <div class="container h-100">
+            <div class="row h-100 align-items-center">
+              <div class="col-lg-7">
+                <div class="hero-content" data-delay="0">
+                  <h1 class="hero-title">
+                    <span class="title-line">TÌM KIẾM</span>
+                    <span class="title-line gradient-text">NGÔI NHÀ MƠ ƯỚC</span>
+                    <span class="title-line">CỦA BẠN</span>
+                  </h1>
+                  <p class="hero-subtitle">
+                    Chỉ từ 200 triệu, nhiều ưu đãi hấp dẫn.<br>
+                    Bạn đang tìm kiếm loại bất động sản nào tại Trà Vinh?
+                  </p>
+                  <!-- Mobile cards - shown only on mobile -->
+                  <div class="floating-cards d-lg-none">
+                    <div class="card-item" data-delay="300">
+                      <div class="card-icon">
+                        <i class="bx bx-home-alt-2"></i>
+                      </div>
+                      <div class="card-info">
+                        <h6>ĐẤT Ở</h6>
+                        <p>Danh sách đất thổ cư, đất nền tại Trà Vinh</p>
+                      </div>
+                    </div>
+                    <div class="card-item" data-delay="400">
+                      <div class="card-icon">
+                        <i class="bx bx-leaf"></i>
+                      </div>
+                      <div class="card-info">
+                        <h6>ĐẤT NÔNG NGHIỆP</h6>
+                        <p>Đầu tư đất vườn, đất ruộng sinh lời cao</p>
+                      </div>
+                    </div>
+                    <div class="card-item" data-delay="500">
+                      <div class="card-icon">
+                        <i class="bx bx-buildings"></i>
+                      </div>
+                      <div class="card-info">
+                        <h6>DỰ ÁN</h6>
+                        <p>Đất dự án, khu đô thị mới tại Trà Vinh</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-5">
+                <div class="hero-visual d-none d-lg-block" data-delay="200">
+                  <div class="floating-cards">
+                    <div class="card-item" data-delay="300">
+                      <div class="card-icon">
+                        <i class="bx bx-home-alt-2"></i>
+                      </div>
+                      <div class="card-info">
+                        <h6>ĐẤT Ở</h6>
+                        <p>Danh sách đất thổ cư, đất nền tại Trà Vinh</p>
+                      </div>
+                    </div>
+                    <div class="card-item" data-delay="400">
+                      <div class="card-icon">
+                        <i class="bx bx-leaf"></i>
+                      </div>
+                      <div class="card-info">
+                        <h6>ĐẤT NÔNG NGHIỆP</h6>
+                        <p>Đầu tư đất vườn, đất ruộng sinh lời cao</p>
+                      </div>
+                    </div>
+                    <div class="card-item" data-delay="500">
+                      <div class="card-icon">
+                        <i class="bx bx-buildings"></i>
+                      </div>
+                      <div class="card-info">
+                        <h6>DỰ ÁN</h6>
+                        <p>Đất dự án, khu đô thị mới tại Trà Vinh</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="col-lg-5 d-flex justify-content-lg-end justify-content-center">
-            <div class="search-box bg-white rounded-4 shadow-lg p-4 mt-4 mt-lg-0 w-100" style="max-width:420px;width:100%;">
-              <h5 class="fw-bold text-brown mb-3"><i class="bx bx-search-alt-2 text-gold me-2"></i>Tìm kiếm bất động sản</h5>
-              <form class="row g-2" id="filterForm">
-                <div class="col-12">
-                  <input type="text" class="form-control" placeholder="Nhập từ khóa, địa điểm..." name="location">
-                </div>
-                <div class="col-6">
-                  <select class="form-select" name="type">
-                    <option value="">Loại đất</option>
-                    <option value="thổ cư">Đất thổ cư</option>
-                    <option value="nông nghiệp">Đất nông nghiệp</option>
-                    <option value="dự án">Đất dự án</option>
-                  </select>
-                </div>
-                <div class="col-6">
-                  <input type="number" class="form-control" placeholder="Diện tích tối thiểu (m²)" name="minArea">
-                </div>
-                <div class="col-6">
-                  <input type="number" class="form-control" placeholder="Giá tối thiểu (tỷ)" name="minPrice">
-                </div>
-                <div class="col-6">
-                  <input type="number" class="form-control" placeholder="Giá tối đa (tỷ)" name="maxPrice">
-                </div>
-                <div class="col-12">
-                  <button type="submit" class="btn btn-gold w-100"><i class="bx bx-search-alt-2 me-1"></i>Tìm kiếm</button>
-                </div>
-              </form>
+          <div class="scroll-indicator">
+            <div class="scroll-text">Cuộn để khám phá</div>
+            <div class="scroll-arrow">
+              <i class="bx bx-chevron-down"></i>
             </div>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- ====== Listed Properties Section ====== -->
-    <section class="py-5 bg-white" id="listing">
-      <div class="container">
-        <div class="text-center mb-4">
-          <h2 class="fw-bold text-brown">BẤT ĐỘNG SẢN NỔI BẬT</h2>
-          <p class="text-brown-50">Khám phá các khu vực nổi bật tại Trà Vinh với nhiều lựa chọn bất động sản hấp dẫn.</p>
+      <!-- ====== Section 2: Search ====== -->
+      <div class="section" data-anchor="search">
+        <div class="slide-content search-section">
+          <div class="container h-100">
+            <div class="row h-100 align-items-center justify-content-center">
+              <div class="col-lg-8">
+                <div class="search-content" data-delay="0">
+                  <div class="section-header text-center mb-5">
+                    <h2 class="section-title">
+                      <span class="title-highlight">Tìm kiếm</span> bất động sản
+                    </h2>
+                    <p class="section-subtitle">
+                      Công cụ tìm kiếm thông minh giúp bạn tìm được bất động sản phù hợp nhất
+                    </p>
+                  </div>
+                  <div class="search-form-wrapper">
+                    <form class="advanced-search-form" id="advancedSearchForm">
+                      <div class="form-grid">
+                        <div class="form-group">
+                          <label>Địa điểm</label>
+                          <div class="input-wrapper">
+                            <i class="bx bx-map"></i>
+                            <input type="text" placeholder="    Nhập địa điểm..." name="location">
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label>Loại đất</label>
+                          <div class="select-wrapper">
+                            <select name="type">
+                              <option value="">Tất cả loại đất</option>
+                              <option value="thổ cư">Đất thổ cư</option>
+                              <option value="nông nghiệp">Đất nông nghiệp</option>
+                              <option value="dự án">Đất dự án</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label>Diện tích (m²)</label>
+                          <div class="range-wrapper">
+                            <input type="number" placeholder="Từ" name="minArea">
+                            <span class="range-separator">-</span>
+                            <input type="number" placeholder="Đến" name="maxArea">
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label>Mức giá (tỷ VNĐ)</label>
+                          <div class="range-wrapper">
+                            <input type="number" placeholder="Từ" name="minPrice">
+                            <span class="range-separator">-</span>
+                            <input type="number" placeholder="Đến" name="maxPrice">
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                          <i class="bx bx-search-alt-2 me-2"></i>
+                          Tìm kiếm ngay
+                        </button>
+                        <button type="button" class="btn btn-outline btn-lg">
+                          <i class="bx bx-filter me-2"></i>
+                          Bộ lọc nâng cao
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="row g-3">
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="property-thumb position-relative rounded-4 overflow-hidden h-100">
-              <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" class="w-100" alt="Trà Vinh">
-              <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-gradient-dark text-white">
-                <div class="fw-bold">TRÀ VINH</div>
-                <div class="small">742 tin đăng | <a href="#" class="text-gold text-decoration-underline">Xem chi tiết</a></div>
-              </div>
+      </div>      <!-- ====== Section 3: Featured Areas ====== -->
+      <div class="section" data-anchor="areas">
+        <div class="slide-content areas-section">
+          <div class="container h-100">
+            <div class="section-header text-center mb-5">
+              <h2 class="section-title">
+                Khu vực <span class="title-highlight">nổi bật</span>
+              </h2>
+              <p class="section-subtitle">
+                Khám phá các khu vực tiềm năng tại Trà Vinh với nhiều cơ hội đầu tư hấp dẫn
+              </p>
             </div>
-          </div>
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="property-thumb position-relative rounded-4 overflow-hidden h-100">
-              <img src="https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=400&q=80" class="w-100" alt="Càng Long">
-              <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-gradient-dark text-white">
-                <div class="fw-bold">CÀNG LONG</div>
-                <div class="small">159 tin đăng | <a href="#" class="text-gold text-decoration-underline">Xem chi tiết</a></div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="property-thumb position-relative rounded-4 overflow-hidden h-100">
-              <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" class="w-100" alt="Duyên Hải">
-              <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-gradient-dark text-white">
-                <div class="fw-bold">DUYÊN HẢI</div>
-                <div class="small">745 tin đăng | <a href="#" class="text-gold text-decoration-underline">Xem chi tiết</a></div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="property-thumb position-relative rounded-4 overflow-hidden h-100">
-              <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" class="w-100" alt="Tiểu Cần">
-              <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-gradient-dark text-white">
-                <div class="fw-bold">TIỂU CẦN</div>
-                <div class="small">143 tin đăng | <a href="#" class="text-gold text-decoration-underline">Xem chi tiết</a></div>
+            <div class="areas-carousel">
+              <div class="swiper areasSwiper">
+                <div class="swiper-wrapper">
+                  <div class="swiper-slide">
+                    <div class="area-card" data-delay="0">
+                      <div class="area-image">
+                        <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80" alt="Trà Vinh" loading="lazy">
+                        <div class="area-overlay">
+                          <div class="area-info">
+                            <h3>TRÀ VINH</h3>
+                            <p>742 tin đăng</p>
+                            <a href="#" class="area-link">Xem chi tiết</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="swiper-slide">
+                    <div class="area-card" data-delay="100">
+                      <div class="area-image">
+                        <img src="https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=800&q=80" alt="Càng Long" loading="lazy">
+                        <div class="area-overlay">
+                          <div class="area-info">
+                            <h3>CÀNG LONG</h3>
+                            <p>159 tin đăng</p>
+                            <a href="#" class="area-link">Xem chi tiết</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="swiper-slide">
+                    <div class="area-card" data-delay="200">
+                      <div class="area-image">
+                        <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80" alt="Duyên Hải" loading="lazy">
+                        <div class="area-overlay">
+                          <div class="area-info">
+                            <h3>DUYÊN HẢI</h3>
+                            <p>745 tin đăng</p>
+                            <a href="#" class="area-link">Xem chi tiết</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="swiper-slide">
+                    <div class="area-card" data-delay="300">
+                      <div class="area-image">
+                        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" alt="Tiểu Cần" loading="lazy">
+                        <div class="area-overlay">
+                          <div class="area-info">
+                            <h3>TIỂU CẦN</h3>
+                            <p>143 tin đăng</p>
+                            <a href="#" class="area-link">Xem chi tiết</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="swiper-slide">
+                    <div class="area-card" data-delay="400">
+                      <div class="area-image">
+                        <img src="https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?auto=format&fit=crop&w=800&q=80" alt="Châu Thành" loading="lazy">
+                        <div class="area-overlay">
+                          <div class="area-info">
+                            <h3>CHÂU THÀNH</h3>
+                            <p>298 tin đăng</p>
+                            <a href="#" class="area-link">Xem chi tiết</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="swiper-slide">
+                    <div class="area-card" data-delay="500">
+                      <div class="area-image">
+                        <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=800&q=80" alt="Cầu Kè" loading="lazy">
+                        <div class="area-overlay">
+                          <div class="area-info">
+                            <h3>CẦU KÈ</h3>
+                            <p>187 tin đăng</p>
+                            <a href="#" class="area-link">Xem chi tiết</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- ====== Recent Properties Section ====== -->
-    <section class="py-5 bg-light">
-      <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h2 class="fw-bold text-brown mb-0">BẤT ĐỘNG SẢN MỚI NHẤT</h2>
-          <a href="#" class="text-gold fw-semibold">Xem tất cả</a>
-        </div>
-        <div class="row g-4" id="productList">
-          <!-- Sản phẩm sẽ được render bằng JS -->
+      <!-- ====== Section 4: Properties ====== -->
+      <div class="section" data-anchor="properties">
+        <div class="slide-content properties-section">
+          <div class="container h-100">
+            <div class="section-header text-center mb-5">
+              <h2 class="section-title">
+                Bất động sản <span class="title-highlight">mới nhất</span>
+              </h2>
+              <p class="section-subtitle">
+                Cập nhật liên tục các bất động sản mới với giá tốt nhất thị trường
+              </p>
+            </div>
+            <div class="properties-carousel">
+              <div class="swiper propertiesSwiper">
+                <div class="swiper-wrapper" id="propertiesContainer">
+                  <!-- Properties will be loaded here -->
+                </div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+
+      <!-- ====== Section 5: Map Location ====== -->
+      <div class="section" data-anchor="map">
+        <div class="slide-content map-section">
+          <div class="container h-100">
+            <div class="row h-100 align-items-center">
+              <div class="col-12">
+                <div class="map-container" data-delay="0">
+                  <div class="section-header text-center mb-4">
+                    <h2 class="section-title">
+                      Tìm <span class="title-highlight">chúng tôi</span> trên bản đồ
+                    </h2>
+                    <p class="section-subtitle">
+                      Văn phòng của chúng tôi tại trung tâm Trà Vinh, dễ dàng tiếp cận và tư vấn trực tiếp
+                    </p>
+                  </div>
+                  
+                  <div class="map-wrapper" data-delay="200">
+                    <div class="map-frame">                      <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15754.658!2d106.3422756!3d9.9348145!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31a017ef3ac9b57d%3A0x1234567890abcdef!2zVHLDoCBWaW5oLCBUaOG7i25oIFRyw6AgVmluaCwgVmnhu4d0IE5hbQ!5e0!3m2!1svi!2s!4v1701234567890!5m2!1svi!2s"
+                        width="100%" 
+                        height="500" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="Vị trí văn phòng Bất Động Sản Văn Phương tại Trà Vinh">
+                      </iframe>
+                    </div>
+                    
+                    <div class="map-info">
+                      <div class="info-card" data-delay="400">
+                        <div class="info-icon">
+                          <i class="bx bx-map"></i>
+                        </div>
+                        <div class="info-content">
+                          <h4>Địa chỉ văn phòng</h4>
+                          <p>123 Đường Nguyễn Đáng, Phường 8, TP. Trà Vinh, Trà Vinh</p>
+                        </div>
+                      </div>
+                      
+                      <div class="info-card" data-delay="600">
+                        <div class="info-icon">
+                          <i class="bx bx-time"></i>
+                        </div>
+                        <div class="info-content">
+                          <h4>Giờ làm việc</h4>
+                          <p>Thứ 2 - Chủ nhật: 8:00 - 18:00</p>
+                        </div>
+                      </div>
+                      
+                      <div class="info-card" data-delay="800">
+                        <div class="info-icon">
+                          <i class="bx bx-phone"></i>
+                        </div>
+                        <div class="info-content">
+                          <h4>Hotline tư vấn</h4>
+                          <p>0123 456 789</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
 
-    <!-- ====== Footer ====== -->
-    <footer class="footer-dark pt-5 pb-3 mt-5" style="background:#23262f;">
-      <div class="container">
-        <div class="row gy-4">
-          <div class="col-md-4 col-lg-3">
-            <div class="d-flex align-items-center mb-3">
-              <span style="background:#bfa76a;width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;margin-right:10px;">
-                <i class="bi bi-house-door-fill text-dark fs-4"></i>
-              </span>
-              <span class="fs-4 fw-bold text-white">TNHH MTV Văn Phương</span>
+      <!-- ====== Section 6: Contact ====== -->
+      <div class="section" data-anchor="contact">
+        <div class="slide-content contact-section">
+          <div class="container h-100">
+            <div class="row h-100 align-items-center">
+              <div class="col-lg-6">
+                <div class="contact-content" data-delay="0">
+                  <div class="section-header mb-4">
+                    <h2 class="section-title">
+                      Kết nối với <span class="title-highlight">chúng tôi</span>
+                    </h2>
+                    <p class="section-subtitle">
+                      Đội ngũ chuyên gia bất động sản sẵn sàng tư vấn và hỗ trợ bạn 24/7
+                    </p>
+                  </div>
+                  <div class="contact-info">
+                    <div class="contact-item" data-delay="100">
+                      <div class="contact-icon">
+                        <i class="bx bx-map"></i>
+                      </div>
+                      <div class="contact-details">
+                        <h6>Địa chỉ</h6>
+                        <p>123 Nguyễn Đáng, TP. Trà Vinh, Trà Vinh</p>
+                      </div>
+                    </div>
+                    <div class="contact-item" data-delay="200">
+                      <div class="contact-icon">
+                        <i class="bx bx-phone"></i>
+                      </div>
+                      <div class="contact-details">
+                        <h6>Điện thoại</h6>
+                        <p>0294 3 888 999</p>
+                      </div>
+                    </div>
+                    <div class="contact-item" data-delay="300">
+                      <div class="contact-icon">
+                        <i class="bx bx-envelope"></i>
+                      </div>
+                      <div class="contact-details">
+                        <h6>Email</h6>
+                        <p>lienhe@namphuong.vn</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="social-links" data-delay="400">
+                    <a href="#" class="social-link">
+                      <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                      <i class="bi bi-instagram"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                      <i class="bi bi-youtube"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                      <i class="bi bi-linkedin"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-6">
+                <div class="contact-form-wrapper" data-delay="200">
+                  <form class="contact-form">
+                    <div class="form-group">
+                      <input type="text" placeholder="Họ và tên" required>
+                    </div>
+                    <div class="form-group">
+                      <input type="email" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                      <input type="tel" placeholder="Số điện thoại" required>
+                    </div>
+                    <div class="form-group">
+                      <select required>
+                        <option value="">Dịch vụ quan tâm</option>
+                        <option value="buy">Mua bất động sản</option>
+                        <option value="sell">Bán bất động sản</option>
+                        <option value="invest">Tư vấn đầu tư</option>
+                        <option value="other">Khác</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <textarea placeholder="Tin nhắn" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                      <i class="bx bx-send me-2"></i>
+                      Gửi tin nhắn
+                    </button>
+                  </form>
+                </div>
+              </div>
             </div>
-            <p class="text-light mb-3" style="font-size:15px;">
-              Khi nói đến lĩnh vực bất động sản, một công ty uy tín sẽ nổi bật bằng việc tái định nghĩa sự chuyên nghiệp trong mọi hoạt động.
-            </p>
-            <div>
-              <a href="#" class="text-light me-2"><i class="bi bi-facebook"></i></a>
-              <a href="#" class="text-light me-2"><i class="bi bi-twitter"></i></a>
-              <a href="#" class="text-light me-2"><i class="bi bi-linkedin"></i></a>
-              <a href="#" class="text-light me-2"><i class="bi bi-google"></i></a>
-              <a href="#" class="text-light"><i class="bi bi-pinterest"></i></a>
-            </div>
-          </div>
-          <div class="col-md-4 col-lg-3">
-            <h6 class="text-uppercase text-white mb-3" style="letter-spacing:1px;">THÔNG TIN LIÊN HỆ</h6>
-            <div class="text-light" style="font-size:15px;">
-              Địa chỉ: 123 Nguyễn Đáng, TP. Trà Vinh, Trà Vinh<br>
-              Điện thoại: 0294 3 888 999<br>
-              Email: lienhe@namphuong.vn
-            </div>
-          </div>
-          <div class="col-md-4 col-lg-3">
-            <h6 class="text-uppercase text-white mb-3" style="letter-spacing:1px;">LIÊN KẾT NHANH</h6>
-            <ul class="list-unstyled text-light" style="font-size:15px;">
-              <li><a href="#" class="text-light text-decoration-none">Dịch vụ</a></li>
-              <li><a href="#" class="text-light text-decoration-none">Giải pháp đầu tư</a></li>
-              <li><a href="#" class="text-light text-decoration-none">Câu hỏi thường gặp</a></li>
-              <li><a href="#" class="text-light text-decoration-none">Hướng dẫn sử dụng</a></li>
-              <li><a href="#" class="text-light text-decoration-none">Đăng ký thành viên</a></li>
-            </ul>
-          </div>
-          <div class="col-md-12 col-lg-3">
-            <h6 class="text-uppercase text-white mb-3" style="letter-spacing:1px;">ĐẶT LỊCH HẸN</h6>
-            <div class="text-light mb-3" style="font-size:15px;">
-              Đặt lịch hẹn tư vấn qua điện thoại, email, hệ thống đặt lịch trực tuyến hoặc ứng dụng.
-            </div>
-            <a href="#" class="btn btn-gold w-100 fw-semibold" style="font-size:16px;"><i class="bx bx-calendar me-1"></i>Đăng ký ngay</a>
-          </div>
-        </div>
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 pt-3 border-top" style="border-color:#34373e !important;">
-          <div class="text-light" style="font-size:14px;">©2025 TNHH MTV Văn Phương. Đã đăng ký bản quyền.</div>
-          <div class="text-light mt-2 mt-md-0" style="font-size:14px;">
-            <a href="#" class="text-light text-decoration-none me-2">Chính sách bảo mật</a> | 
-            <a href="#" class="text-light text-decoration-none ms-2">Sơ đồ website</a>
           </div>
         </div>
       </div>
-    </footer>
 
-    <!-- ====== Nút cuộn lên đầu trang ====== -->
-    <button id="scrollTopBtn" class="btn btn-gold rounded-circle shadow" style="position:fixed;bottom:32px;right:32px;z-index:1050;display:none;width:48px;height:48px;font-size:1.5rem;">
-      <i class="bx bx-chevron-up"></i>
-    </button>
-
-    <!-- ====== JS ====== -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="assets/script.js"></script>
-    <script>
-      // Loading overlay
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          document.getElementById('loadingOverlay').classList.add('loaded');
-        }, 600); // delay for effect
-      });
-      AOS.init();
-      // Hiện/ẩn nút cuộn lên đầu trang
-      const scrollBtn = document.getElementById('scrollTopBtn');
-      window.addEventListener('scroll', function() {
-        if (window.scrollY > 200) {
-          scrollBtn.style.display = 'block';
-        } else {
-          scrollBtn.style.display = 'none';
-        }
-      });
-      scrollBtn.addEventListener('click', function() {
-        window.scrollTo({top: 0, behavior: 'smooth'});
-      });
-    </script>
-
-    <!-- ====== Contact Sidebar ====== -->
-    <div class="contact-sidebar">
-      <a href="tel:0123456789" class="contact-item contact-phone" target="_blank">
-        <span class="contact-icon"><i class="bi bi-telephone-fill"></i></span>
-        <span class="contact-label">Gọi điện</span>
-      </a>
-      <a href="https://zalo.me/" class="contact-item contact-zalo" target="_blank">
-        <span class="contact-icon"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" style="width:24px;height:24px;"></span>
-        <span class="contact-label">Chat Zalo</span>
-      </a>
-      <a href="https://m.me/" class="contact-item contact-facebook" target="_blank">
-        <span class="contact-icon"><i class="bi bi-messenger"></i></span>
-        <span class="contact-label">Facebook</span>
-      </a>
     </div>
+
+    <!-- ====== Floating Contact ====== -->
+    <div class="floating-contact">
+      <div class="contact-toggle">
+        <i class="bx bx-message-dots"></i>
+      </div>
+      <div class="contact-options">
+        <a href="tel:0123456789" class="contact-option phone">
+          <i class="bx bx-phone"></i>
+          <span>Gọi điện</span>
+        </a>
+        <a href="https://zalo.me/" class="contact-option zalo" target="_blank">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo">
+          <span>Zalo</span>
+        </a>
+        <a href="https://m.me/" class="contact-option messenger" target="_blank">
+          <i class="bx bxl-messenger"></i>
+          <span>Messenger</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ====== JS Libraries ====== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/4.0.20/fullpage.min.js"></script>
+    <script src="https://unpkg.com/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="assets/script.js"></script>
   </body>
 </html>
